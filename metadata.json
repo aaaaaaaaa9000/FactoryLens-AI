@@ -1,0 +1,6 @@
+{
+  "name": "بصير المصانع - محرك البحث البصري للمصانع والمنتجات",
+  "description": "تطبيق ذكي للبحث عن الصور المماثلة واستخراج بيانات المصانع والشعارات آلياً والبحث المتخصص في فيسبوك وتليجرام ومحركات البحث العكسي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
