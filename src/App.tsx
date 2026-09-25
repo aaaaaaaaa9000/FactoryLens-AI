@@ -7,6 +7,7 @@ import {
   Building2,
   Send,
   Facebook,
+  Instagram,
   Image as ImageIcon,
   CheckCircle2,
   XCircle,
@@ -273,13 +274,13 @@ export default function App() {
 
               <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
                 ابحث عن الصور المماثلة، واكشف بيانات المصنع على{' '}
-                <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-                  فيسبوك وتليجرام
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">
+                  فيسبوك، تليجرام، انستغرام، وتويتر
                 </span>
               </h2>
 
               <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                ارفع صورة المنتج أو تيكت الملابس أو كرتونة الأحذية، وسيقوم النظام فوراً باستخراج اسم المصنع من اللوجو والنصوص، والبحث المباشر في صفحات وجروبات فيسبوك وقنوات تليجرام ومحركات البحث العكسي.
+                ارفع صورة المنتج أو تيكت الملابس أو كرتونة الأحذية، وسيقوم النظام فوراً بتطبيق خوارزمية التطابق البصري المقاوم لاختلاف الزوايا والإضاءة، واستخراج اسم المصنع من اللوجو والنصوص، والبحث المباشر عبر كافة المنصات الاجتماعية.
               </p>
             </div>
 
@@ -292,34 +293,44 @@ export default function App() {
             />
 
             {/* Feature Highlights Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center">
-                  <ImageIcon className="w-5 h-5" />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4">
+              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-bold text-white">مطابقة الصور المماثلة</h3>
+                <h3 className="text-sm font-bold text-white">خوارزمية مطابقة فائقة الدقة</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  ربط فوري بمحركات Yandex وGoogle Lens للبحث البصري عن نفس القطعة أو الموديلات المشابهة في الكتالوجات العالمية.
+                  التعرف على الموديلات حتى مع اختلاف زاوية التصوير أو الإضاءة الخافتة أو انعكاسات أكياس التغليف.
                 </p>
               </div>
 
-              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-2">
+              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2">
                 <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center">
                   <Facebook className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-bold text-white">كشف صفحات وجروبات فيسبوك</h3>
+                <h3 className="text-sm font-bold text-white">فيسبوك وتليجرام</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  البحث التلقائي باسم المصنع واللوجو للوصول إلى الصفحات الرسمية، جروبات الجملة، وبوستات كود الموديل.
+                  البحث باسم المصنع واللوجو للوصول للصفحات الرسمية وجروبات الجملة وقنوات مكاتب التوريد.
                 </p>
               </div>
 
-              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-2">
-                <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center">
-                  <Send className="w-5 h-5" />
+              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center">
+                  <Instagram className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm font-bold text-white">البحث المتخصص في تليجرام</h3>
+                <h3 className="text-sm font-bold text-white">انستغرام وتويتر (𝕏)</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  فحص قنوات المصانع ومكاتب التوريد المباشرة عبر أدلة TGStat وبحث قنوات t.me للوصول إلى أسعار جملة الجملة.
+                  كشف معارض الموديل وريلز انستغرام ومتابعة أحدث تغريدات وإعلانات المصانع المباشرة على منصة 𝕏.
+                </p>
+              </div>
+
+              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-2">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center">
+                  <ImageIcon className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-bold text-white">البحث العكسي Yandex و Lens</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  مطابقة فورية في أقوى محركات البحث البصري للعثور على نفس القطعة في الكتالوجات العالمية.
                 </p>
               </div>
             </div>

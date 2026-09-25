@@ -1,6 +1,6 @@
 /**
  * Helpers to build direct deep search queries across search engines,
- * Facebook directories, and Telegram channels.
+ * Facebook, Telegram, Instagram, and Twitter (X) directories.
  */
 
 export interface SearchEngineLink {
@@ -23,7 +23,7 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
       id: 'google-lens',
       name: 'Google Lens & Images',
       nameAr: 'عدسة جوجل (Google Lens)',
-      description: 'أقوى محرك عالمي للتعرف على المنتجات ومطابقة الصور والموديلات المتشابهة بدقة.',
+      description: 'أقوى محرك عالمي للتعرف على المنتجات ومطابقة الصور والموديلات المتشابهة بدقة حتى مع اختلاف الزوايا والإضاءة.',
       iconName: 'Sparkles',
       badge: 'الأكثر دقة',
       badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -34,9 +34,9 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
       id: 'yandex-images',
       name: 'Yandex Visual Search',
       nameAr: 'ياندكس للصور (Yandex)',
-      description: 'المحرك الأفضل عالمياً في العثور على نفس تصميم الملابس والمنتجات والعلامات التجارية بدقة متناهية.',
+      description: 'المحرك الأفضل عالمياً في العثور على نفس تصميم الملابس والمنتجات بنمط النسيج وتفاصيل القصات الدقيقة.',
       iconName: 'Image',
-      badge: 'الأفضل للملابس',
+      badge: 'الأفضل للملابس والأقمشة',
       badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
       url: `https://yandex.com/images/search?text=${query}`,
       isImageUpload: true,
@@ -45,7 +45,7 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
       id: 'bing-visual',
       name: 'Bing Visual Search',
       nameAr: 'بينج البصري (Bing)',
-      description: 'بحث بصري متقدم ومطابقة الموديلات والمنتجات عبر المتاجر العالمية ومنصات البيع.',
+      description: 'بحث بصري متقدم ومطابقة الموديلات والمنتجات عبر المتاجر العالمية وكتالوجات المصانع مع معالجة الظلال.',
       iconName: 'Search',
       badge: 'متاجر ومصانع',
       badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -56,7 +56,7 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
       id: 'pinterest',
       name: 'Pinterest Search',
       nameAr: 'بينترست (Pinterest)',
-      description: 'للبحث عن استايلات وتصميمات الموضة والأزياء والكتالوجات المماثلة.',
+      description: 'للبحث عن استايلات وتصميمات الموضة والأزياء والكتالوجات المماثلة الملتقطة بزوايا احترافية.',
       iconName: 'Flame',
       badge: 'كتالوجات وأزياء',
       badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
@@ -69,7 +69,6 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
 export function generateFacebookDeepLinks(factoryName: string, modelCode?: string, category?: string) {
   const baseName = factoryName.trim();
   const cleanModel = modelCode?.trim() || '';
-  const cleanCategory = category?.trim() || '';
 
   const qFactory = encodeURIComponent(baseName);
   const qFactoryWholesale = encodeURIComponent(`مصنع ${baseName} جملة`);
@@ -157,6 +156,99 @@ export function generateTelegramDeepLinks(factoryName: string, modelCode?: strin
       badge: 'فحص التفاعل',
       url: `https://telemetr.io/en/channels?filter%5Bsearch%5D=${qTgRaw}`,
       color: 'from-indigo-500 to-sky-600',
+    },
+  ];
+}
+
+export function generateInstagramDeepLinks(factoryName: string, modelCode?: string, category?: string) {
+  const baseName = factoryName.trim();
+  const cleanModel = modelCode?.trim() || '';
+  const cleanTag = baseName.replace(/[\s\-_]+/g, '_');
+  const qFactory = encodeURIComponent(`"مصنع ${baseName}"`);
+
+  return [
+    {
+      id: 'ig-google-profiles',
+      title: 'كشف حسابات المصنع على انستغرام',
+      titleEn: 'Google site:instagram.com',
+      subtitle: `البحث عن بروفايل المصنع المعتمد ومعارض الملابس: "${baseName}"`,
+      badge: 'حسابات ومتاجر',
+      url: `https://www.google.com/search?q=site:instagram.com+${encodeURIComponent(`"${baseName}" OR "مصنع ${baseName}"`)}`,
+      color: 'from-pink-600 to-rose-600',
+    },
+    {
+      id: 'ig-hashtag-search',
+      title: 'هاشتاج المصنع والموديل',
+      titleEn: 'Factory Hashtag',
+      subtitle: `استعراض المنشورات ومقاطع الريلز تحت وسم: #${cleanTag}`,
+      badge: 'ريلز وصور',
+      url: `https://www.instagram.com/explore/tags/${encodeURIComponent(cleanTag)}/`,
+      color: 'from-fuchsia-600 to-pink-500',
+    },
+    {
+      id: 'ig-model-search',
+      title: 'منشورات كود الموديل بالصور',
+      titleEn: 'Model Code Posts',
+      subtitle: `البحث عن صور الموديل الملتقطة بالفيديو والريلز: "${cleanModel || baseName}"`,
+      badge: 'صور الموديل',
+      url: `https://www.google.com/search?q=site:instagram.com+${encodeURIComponent(`"${baseName}" "${cleanModel}"`)}`,
+      color: 'from-purple-600 to-pink-600',
+    },
+    {
+      id: 'ig-direct-app',
+      title: 'فتح بحث تطبيق انستغرام',
+      titleEn: 'Instagram App Search',
+      subtitle: `استكشاف الموديلات المشابهة وموردي الجملة عبر انستغرام`,
+      badge: 'تطبيق مباشر',
+      url: `https://www.instagram.com/explore/search/`,
+      color: 'from-rose-500 to-amber-500',
+    },
+  ];
+}
+
+export function generateTwitterDeepLinks(factoryName: string, modelCode?: string, category?: string) {
+  const baseName = factoryName.trim();
+  const cleanModel = modelCode?.trim() || '';
+  const qXAll = encodeURIComponent(`"${baseName}" (مصنع OR جملة OR توريد OR تصنيع)`);
+  const qXMedia = encodeURIComponent(`"${baseName}" filter:media`);
+  const qXUsers = encodeURIComponent(`"${baseName}"`);
+
+  return [
+    {
+      id: 'tw-posts-latest',
+      title: 'أحدث تغريدات وإعلانات المصنع',
+      titleEn: 'Latest Tweets & News',
+      subtitle: `البحث المباشر في أحدث تغريدات المصنع وعروض التوريد على منصة X`,
+      badge: 'تغريدات حية',
+      url: `https://x.com/search?q=${qXAll}&f=live`,
+      color: 'from-slate-700 to-slate-900',
+    },
+    {
+      id: 'tw-media-photos',
+      title: 'صور وفيديوهات الموديلات على X',
+      titleEn: 'Media & Photo Feed',
+      subtitle: `فحص صور المنتجات المرفوعة من المعارض والمصنع على تويتر`,
+      badge: 'صور وفيديوهات',
+      url: `https://x.com/search?q=${qXMedia}&f=media`,
+      color: 'from-slate-800 to-blue-900',
+    },
+    {
+      id: 'tw-accounts',
+      title: 'حسابات المصانع والشركات',
+      titleEn: 'Official Accounts on X',
+      subtitle: `البحث في الحسابات الرسمية الموثقة للمصانع والورش والمسؤولين`,
+      badge: 'حسابات موثقة',
+      url: `https://x.com/search?q=${qXUsers}&f=user`,
+      color: 'from-blue-700 to-slate-900',
+    },
+    {
+      id: 'tw-google-x',
+      title: 'أرشيف تويتر المتخصص عبر جوجل',
+      titleEn: 'Google site:x.com',
+      subtitle: `كشف ثريدات وصفقات الجملة وأرقام التواصل المذكورة في التغريدات`,
+      badge: 'أرشيف صفقات',
+      url: `https://www.google.com/search?q=site:x.com+${encodeURIComponent(`"${baseName}" (مصنع OR هاتف OR واتساب)`)}`,
+      color: 'from-cyan-700 to-slate-800',
     },
   ];
 }

@@ -17,11 +17,31 @@ export interface LogoDetails {
   description?: string;
 }
 
+export interface VisualFingerprint {
+  structuralSilhouette: string; // الوصف الهندسي للقصّة والأبعاد المقاوم لزاوية التصوير
+  colorPaletteInvariant: string[]; // لوحة الألوان المقاومة لدرجات الإضاءة وظلال الفلاش
+  textureAndFabricPattern: string; // نمط النسيج والتطريز وخامة التصنيع
+  invariantKeypoints: string[]; // نقاط التمايز البصري الثابتة غير المتأثرة بالدوران والقص
+  lightingAndAngleToleranceNotes: string; // تقرير معالجة تشوهات الإضاءة وزاوية الالتقاط
+  robustSearchTokens: string[]; // كلمات دلالية بصرية محكمة للبحث العكسي
+}
+
+export interface VisualSimilarityMetrics {
+  overallScore: number; // النسبة الإجمالية للثقة والمطابقة (0-100)
+  structuralMatch: number; // مطابقة الهيكل والقصة (مقاوم للتكبير/التصغير)
+  textureColorMatch: number; // مطابقة النسيج والألوان (مقاوم لاختلاف الإضاءة)
+  logoTypographyMatch: number; // مطابقة الشعار وهندسة الخط (مقاوم للميلان والانحراف)
+  detailsHardwareMatch: number; // مطابقة تفاصيل الخياطة والأزرار والإكسسوار
+}
+
 export interface SearchQueries {
   facebookPageQueries: string[];
   facebookGroupQueries?: string[];
   telegramQueries: string[];
+  instagramQueries: string[]; // استعلامات انستغرام (حسابات وهاشتاجات)
+  twitterQueries: string[]; // استعلامات تويتر / إكس (حسابات وتغريدات)
   reverseImageKeywords: string[];
+  multiAngleReverseQueries: string[]; // استعلامات بصرية مقاومة للزوايا المختلفة
 }
 
 export interface ImageAnalysisResult {
@@ -36,6 +56,8 @@ export interface ImageAnalysisResult {
   contactInfo?: ExtractedContact;
   specs?: ExtractedSpecs;
   visualFeatures?: string[];
+  visualFingerprint?: VisualFingerprint;
+  similarityMetrics?: VisualSimilarityMetrics;
   searchQueries: SearchQueries;
   summaryAr: string;
 }
@@ -57,6 +79,24 @@ export interface TelegramFinding {
   category?: string;
 }
 
+export interface InstagramFinding {
+  title: string;
+  url: string;
+  username?: string;
+  snippet: string;
+  followersHint?: string;
+  accountType?: string; // 'حساب مصنع رسمي' | 'متجر جملة وتوزيع' | 'معرض منتجات'
+}
+
+export interface TwitterFinding {
+  title: string;
+  url: string;
+  handle?: string;
+  snippet: string;
+  postDate?: string;
+  relevance?: string; // 'إعلان مصنع' | 'توريد جملة' | 'مكتب بيع'
+}
+
 export interface WholesaleSource {
   title: string;
   url: string;
@@ -68,6 +108,8 @@ export interface GroundedSearchResult {
   factoryOverview: string;
   facebookFindings: FacebookFinding[];
   telegramFindings: TelegramFinding[];
+  instagramFindings?: InstagramFinding[];
+  twitterFindings?: TwitterFinding[];
   otherWholesaleSources?: WholesaleSource[];
   contactDirectory?: {
     phones?: string[];

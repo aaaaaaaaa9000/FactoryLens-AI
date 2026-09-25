@@ -140,7 +140,7 @@ export const SAMPLE_DATA: SampleItem[] = [
       contactInfo: {
         phones: ['01092837465'],
         addresses: ['المنطقة الصناعية B1، العاشر من رمضان، مصر'],
-        socialHandles: ['@al_nour_fashion', 'fb.com/alnourgarments'],
+        socialHandles: ['@al_nour_fashion', 'fb.com/alnourgarments', 'x.com/alnour_factory'],
       },
       specs: {
         colors: ['أسود كلاسيك', 'زيتي ملكي', 'كشمير دافئ', 'هافان'],
@@ -154,6 +154,30 @@ export const SAMPLE_DATA: SampleItem[] = [
         'شريط جانبي مميز على البنطلون',
         'أساور قطنية مضلعة',
       ],
+      visualFingerprint: {
+        structuralSilhouette: 'قصة ترنج كاجوال سويت شيرت وبنطلون بأساور مضلعة وياقة دائرية مع نسبة أبعاد ثابتة',
+        colorPaletteInvariant: ['أسود كربوني', 'زيتي دافئ', 'ذهبي تطريز النور'],
+        textureAndFabricPattern: 'نسيج ميلتون مُمشط ومبطن من الداخل بكثافة قطنية 320 جرام مع درزات متوازية',
+        invariantKeypoints: [
+          'تطريز الشعار السداسي المركزي بارتفاع 4.5 سم',
+          'درزة الصدر المزدوجة المتصلة بالأكمام',
+          'شريط البنطلون الجانبي بعرض 2.5 سم',
+          'ياقة التريكو المضلع بنسبة تمدد 1x1',
+        ],
+        lightingAndAngleToleranceNotes: 'تمت معايرة تدرجات الظلال وانعكاسات النايلون على التيكت بنجاح، مما يسمح بالتعرف على الموديل حتى عند تصويره مائلاً بزاوية 45 درجة أو تحت إضاءة محلات خافتة.',
+        robustSearchTokens: [
+          'مصنع النور ترنج ميلتون كود 704 العاشر',
+          'Al Nour garments MOD-704-NOUR wholesale',
+          'سويت شيرت النور تطريز سداسي ذهبي',
+        ],
+      },
+      similarityMetrics: {
+        overallScore: 97,
+        structuralMatch: 98,
+        textureColorMatch: 95,
+        logoTypographyMatch: 99,
+        detailsHardwareMatch: 94,
+      },
       searchQueries: {
         facebookPageQueries: [
           'مصنع النور للأزياء العاشر من رمضان جملة',
@@ -169,18 +193,31 @@ export const SAMPLE_DATA: SampleItem[] = [
           'مكتب النور جملة العاشر t.me',
           'مصنع النور كود 704 تليجرام',
         ],
+        instagramQueries: [
+          'site:instagram.com "مصنع النور" العاشر',
+          'هاشتاج #مصنع_النور_للملابس',
+          'site:instagram.com "MOD-704-NOUR"',
+        ],
+        twitterQueries: [
+          '"مصنع النور" ملابس العاشر جملة',
+          'site:x.com "مصنع النور" 704',
+        ],
         reverseImageKeywords: [
           'مصنع النور ملابس العاشر من رمضان',
           'MOD-704-NOUR ترنج قطن ميلتون',
           'Al Nour garments wholesale Egypt',
         ],
+        multiAngleReverseQueries: [
+          'Al Nour fashion factory winter tracksuit 704',
+          'مصنع النور العاشر ترنج ميلتون قصة كاجوال',
+        ],
       },
       summaryAr:
-        'تم التعرف بنجاح وبدقة فائقة على مصنع "النور للأزياء" بالعاشر من رمضان، وتحديد كود الموديل MOD-704-NOUR مع رقم واتساب مبيعات الجملة وبيانات السيرية والمقاسات.',
+        'تم التعرف بنجاح وبدقة فائقة على مصنع "النور للأزياء" بالعاشر من رمضان، وتحديد كود الموديل MOD-704-NOUR مع مطابقة المعالم الهندسية والشعار عبر فيسبوك وتليجرام وانستغرام وتويتر.',
     },
     mockSearch: {
       factoryOverview:
-        'مصنع النور للأزياء والملابس الجاهزة يعد من كبرى الورش والمصانع المتخصصة في الترنجات والملابس الرياضية والكاجوال بالعاشر من رمضان، وله مكاتب توزيع رئيسية في العتبة (شارع الرويعي) ووكالة البلح والإسكندرية.',
+        'مصنع النور للأزياء والملابس الجاهزة يعد من كبرى الورش والمصانع المتخصصة في الترنجات والملابس الرياضية والكاجوال بالعاشر من رمضان، وله مكاتب توزيع رئيسية في العتبة ووكالة البلح والإسكندرية.',
       facebookFindings: [
         {
           title: 'صفحة مصنع النور للملابس الجاهزة - Al Nour Factory',
@@ -219,6 +256,34 @@ export const SAMPLE_DATA: SampleItem[] = [
           category: 'مكتب جملة وتوزيع',
         },
       ],
+      instagramFindings: [
+        {
+          title: 'حساب مصنع النور للأزياء | Al Nour Fashion Store',
+          url: 'https://www.instagram.com/explore/tags/مصنع_النور/',
+          username: '@alnour_wear_official',
+          snippet: 'معرض كولكشن ترنجات شتوي وصيفي 2026 - استعراض ريلز الموديلات على المانيكان بكود 704 وجودة التقفيل والقطن.',
+          followersHint: '48.2K متابع • تصوير فيديو حي للموديلات',
+          accountType: 'حساب مصنع رسمي',
+        },
+        {
+          title: 'هاشتاج موديل 704 مصنع النور (#alnour_704)',
+          url: 'https://www.instagram.com/explore/tags/alnour_704/',
+          username: '#alnour_704',
+          snippet: 'منشورات تجار الملابس وأصحاب البوتيكات لموديل الترنج الميلتون وتنسيقات الألوان المختلفة.',
+          followersHint: 'صور وريلز متعددة الزوايا',
+          accountType: 'هاشتاج الموديل',
+        },
+      ],
+      twitterFindings: [
+        {
+          title: 'حساب مبيعات مصانع العاشر على 𝕏 (@10th_garments)',
+          url: 'https://x.com/search?q=مصنع+النور+العاشر',
+          handle: '@10th_garments',
+          snippet: 'توريد دفعة جديدة من ترنجات مصنع النور كود 704 بأسعار الجملة لعملاء الصعيد والقاهرة والإسكندرية.',
+          postDate: 'منشور حديث',
+          relevance: 'إعلان توريد مباشر',
+        },
+      ],
       contactDirectory: {
         phones: ['01092837465'],
         whatsapps: ['https://wa.me/201092837465'],
@@ -227,7 +292,7 @@ export const SAMPLE_DATA: SampleItem[] = [
       actionTips: [
         'اطلب دائماً السعر لجملة الدستة أو السيرية، فالمصنع لا يبيع بالقطعة.',
         'تأكد من وجود الكود الأصلي MOD-704 لتجنب الموديلات المقلدة التي تصنع بخامات مخلوطة.',
-        'يمكنك التواصل عبر رابط واتساب المباشر لمطابقة كروت المقاسات قبل تحويل العربون.',
+        'استعرض ريلز انستغرام لمشاهدة مرونة الخامة تحت الإضاءة الطبيعية قبل تحويل العربون.',
       ],
     },
   },
@@ -261,7 +326,7 @@ export const SAMPLE_DATA: SampleItem[] = [
       contactInfo: {
         phones: ['01154789632'],
         addresses: ['منطقة الورش الصناعية، المحلة الكبرى، الغربية'],
-        socialHandles: ['@royal_shoes_wholesale'],
+        socialHandles: ['@royal_shoes_wholesale', 'x.com/royalshoes_eg'],
       },
       specs: {
         colors: ['أبيض * رصاصي', 'أسود فل كربون', 'كحلي نيون'],
@@ -274,6 +339,30 @@ export const SAMPLE_DATA: SampleItem[] = [
         'شعار التاج مطبوع على اللسان والجوانب',
         'فرش طبي ميموري فوم مضاد للروائح',
       ],
+      visualFingerprint: {
+        structuralSilhouette: 'هيكل حذاء سنيكرز رياضي منحني بمقدمة مرفوعة 15 درجة وكعب داعم ممتص للصدمات',
+        colorPaletteInvariant: ['أبيض ناصع', 'رصاصي كربوني', 'فيروزي نيون'],
+        textureAndFabricPattern: 'نسيج شبكي مسامي ثلاثي الأبعاد مع نعل حقن إيفا محفور ببروزات مانعة للانزلاق',
+        invariantKeypoints: [
+          'شعار التاج البارز على الجانب الأيمن والأيسر',
+          'انحناء الكعب الخلفي بارتفاع 3.8 سم',
+          'فتحات الأربطة المقواة بحلقات حرارية',
+          'بروزات النعل الهندسية السفلية',
+        ],
+        lightingAndAngleToleranceNotes: 'تمت معالجة بريق البلاستيك والتصوير العلوي لكرتونة الأحذية بنجاح، مع عزل الشعار والباركود بدقة متناهية دون تأثر بدرجة سطوع الفلاش.',
+        robustSearchTokens: [
+          'كوتشي رويال سبورت 2026 نعل حقن إيفا',
+          'Royal Shoes footwear industry Mahalla',
+          'حذاء رياضي طبي رويال كود ROYAL-RUN-2026',
+        ],
+      },
+      similarityMetrics: {
+        overallScore: 95,
+        structuralMatch: 96,
+        textureColorMatch: 93,
+        logoTypographyMatch: 98,
+        detailsHardwareMatch: 91,
+      },
       searchQueries: {
         facebookPageQueries: [
           'مصنع رويال للأحذية المحلة الكبرى جملة',
@@ -289,14 +378,27 @@ export const SAMPLE_DATA: SampleItem[] = [
           'مصنع رويال أحذية t.me',
           'كوتشي 2026 رويال جملة',
         ],
+        instagramQueries: [
+          'site:instagram.com "رويال للأحذية" المحلة',
+          'هاشتاج #كوتشيات_رويال',
+          'site:instagram.com "ROYAL-RUN-2026"',
+        ],
+        twitterQueries: [
+          '"مصنع رويال" أحذية كوتشي جملة',
+          'site:x.com "رويال للأحذية"',
+        ],
         reverseImageKeywords: [
           'كوتشي رويال مصنع المحلة',
           'ROYAL-RUN-2026 sneaker wholesale',
           'مصنع أحذية رياضية رويال',
         ],
+        multiAngleReverseQueries: [
+          'Royal footwear running shoes model 2026 EVA sole',
+          'كوتشي رويال فوتوير نعل فوم طبي زاوية جانبية',
+        ],
       },
       summaryAr:
-        'تم استخراج تفاصيل مصنع "رويال للأحذية" بالمحلة الكبرى، وكود الموديل الطبي 2026، مع أرقام التواصل لحجز كراتين الجملة والسريات.',
+        'تم استخراج تفاصيل مصنع "رويال للأحذية" بالمحلة الكبرى، وكود الموديل الطبي 2026، وتفعيل خوارزمية التطابق البصري لمطابقة موديلات الكوتشي عبر شبكات فيسبوك وتليجرام وانستغرام وتويتر.',
     },
     mockSearch: {
       factoryOverview:
@@ -319,6 +421,26 @@ export const SAMPLE_DATA: SampleItem[] = [
           username: '@royal_shoes_wholesale',
           snippet: 'قناة متخصصة لعرض صور الكوتشيات وفيديوهات المرونة والوزن مع كروت المقاسات والأسعار للجملة فقط.',
           category: 'قناة مصنع',
+        },
+      ],
+      instagramFindings: [
+        {
+          title: 'حساب رويال فوتوير على انستغرام | @royal_shoes_eg',
+          url: 'https://www.instagram.com/explore/tags/كوتشيات_رويال/',
+          username: '@royal_shoes_eg',
+          snippet: 'فيديوهات اختبار مرونة نعل الفوم ومقاومة الانزلاق لكود 2026 - عروض حصرية لأصحاب محلات الأحذية بالجملة.',
+          followersHint: '22.5K متابع • تصوير تجارب مرونة ونعل الحقن',
+          accountType: 'حساب مصنع رسمي',
+        },
+      ],
+      twitterFindings: [
+        {
+          title: 'تغريدات سوق الأحذية بمصر على 𝕏',
+          url: 'https://x.com/search?q=مصنع+رويال+أحذية',
+          handle: '@shoes_wholesale_eg',
+          snippet: 'عروض حجز كراتين كوتشي رويال موديل 2026 - تسليم فوري المحلة وباب الشعرية وشحن محافظات.',
+          postDate: 'منشور حديث',
+          relevance: 'توريد جملة',
         },
       ],
       contactDirectory: {

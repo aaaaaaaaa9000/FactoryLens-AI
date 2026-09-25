@@ -112,23 +112,28 @@ app.post('/api/analyze-image', async (req: Request, res: Response) => {
     };
 
     const promptText = `
-أنت خبير محترف ومحقق في كشف وتتبع المصانع والعلامات التجارية والمنتجات التجارية والجملة من الصور.
+أنت كبير مهندسي الرؤية الحاسوبية وخبير استخبارات المصانع وتتبع سلاسل التوريد والمنتجات التجارية.
 المهمة:
-قم بتحليل الصورة المرفقة بدقة فائقة واستخراج جميع البيانات الممكنة للبحث عن الصور المماثلة، وصفحات المصنع على فيسبوك، وقنوات تليجرام للمصنع وموزعيه.
+قم بتطبيق خوارزمية تحليل بصري فائقة الدقة ومقاومة للاختلافات (Lighting & Angle-Invariant Perceptual Matching) لتحليل الصورة المرفقة واستخراج جميع البيانات لربطها بالمصانع على فيسبوك، تليجرام، انستغرام، وتويتر (X)، ومحركات البحث العكسي.
 
-يرجى فحص ما يلي بعناية:
-1. اسم المصنع أو اسم الشركة أو الورشة (بالعربية والإنجليزية إن وجد)، سواء كان مكتوباً على بطاقة السعر (Tag)، أو كرتونة التعبئة، أو شريط الرقبة، أو مطبوعاً على المنتج، أو مدمجاً في اللوجو.
-2. اللوجو (الشعار): اسم الماركة في الشعار، وصف شكل الشعار، الرموز.
-3. تفاصيل الاتصال المطبوعة: أرقام تليفونات، واتساب، عناوين مصانع (مثل: العاشر من رمضان، المحلة الكبرى، العتبة، الموسكي، القنطرة، الإسكندرية، شبرا الخيمة، تركيا، جوانزو، إلخ)، حسابات فيسبوك أو تليجرام المكتوبة.
-4. كود الموديل / رقم القطعة / السيريال / رقم التصميم (Style/Model/Art No.).
-5. تصنيف المنتج بدقة (ملابس حريمي، كاجوال رجالي، أطفال وبيبي، أحذية وكوتشيات، شنط ومصنوعات جلدية، لانجري وبيجامات، مفروشات، أدوات منزلية، إلكترونيات، إلخ).
-6. المواصفات البصرية: الألوان، نوع القماش/الخامة، القصات، التفاصيل المميزة (تطريز، طباعة، أزرار، كول) لتسهيل العثور على نفس القطعة أو موديلات مماثلة.
-7. تفاصيل بيع الجملة (السرية / الدستة / التكرار / المقاسات).
-8. اقتراح استعلامات بحث قوية ومخصصة لـ:
-   - البحث في صفحات فيسبوك (Facebook Pages)
-   - البحث في مجموعات فيسبوك للجملة (Facebook Groups)
-   - البحث في قنوات تليجرام للمصانع والمكاتب (Telegram Channels)
-   - كلمات البحث البصري للمحركات (Google Lens / Reverse Search keywords)
+قواعد خوارزمية التطابق البصري المقاوم للاختلافات:
+1. دقة التعرف عبر الزوايا المختلفة (Perspective & Angle Invariance):
+   - قم بالتعرف على الموديل والشعار حتى لو كانت الصورة ملتقطة من زاوية مائلة أو جانبية أو علوية.
+   - قم باستخراج المعالم الهيكلية الثابتة (Silhouette & Structural geometry).
+2. معالجة تشوهات الإضاءة والظلال (Lighting & Shadow Compensation):
+   - قم بتمييز الألوان والخامات حتى لو كانت الصورة ذات إضاءة خافتة، أو إضاءة فلاش ساطعة، أو انعكاسات أكياس التغليف والنايلون.
+3. التكبير والقص الجزئي (Scale & Cropping Tolerance):
+   - التعرف على الموديل حتى لو كانت الصورة تظهر جزءاً فقط من القطعة أو تيكت السعر أو الكرتونة.
+4. استخراج بيانات المصنع واللوجو والـ OCR:
+   - اسم المصنع / الشركة / الورشة (عربي وإنجليزي).
+   - اللوجو والرموز والعلامات المائية.
+   - أكواد الموديلات (Style/Model/Art No.)، أرقام السيريال، أرقام هواتف وواتساب، العناوين الصناعية (العاشر من رمضان، المحلة، العتبة، 6 أكتوبر، شبرا، تركيا، جوانزو، إلخ).
+5. توليد استعلامات مخصصة لمنصات التواصل:
+   - فيسبوك (Facebook Pages & Groups)
+   - تليجرام (Telegram Channels & Wholesalers)
+   - انستغرام (Instagram Accounts, Reels, & Hashtags: حسابات معارض ومصانع، هاشتاج الموديل)
+   - تويتر / إكس (Twitter/X Posts & Manufacturer Accounts)
+   - استعلامات البحث العكسي المقاومة لتغير الزوايا والإضاءة (Multi-Angle Reverse Visual Search)
 ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` : ''}
 `;
 
@@ -137,7 +142,7 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
         parts: [imagePart, { text: promptText }],
       },
       config: {
-        systemInstruction: 'أنت نظام ذكي مخصص لتحليل صور المنتجات واستخراج بيانات المصانع والشعارات والرموز لتسهيل البحث على فيسبوك وتليجرام ومحركات البحث العكسي. أخرج البيانات دائماً بصيغة JSON وفق المخطط المطلوب.',
+        systemInstruction: 'أنت نظام متقدم للتحليل البصري الدقيق واستخراج بيانات المصانع والشعارات بدقة متناهية عبر منصات التواصل فيسبوك، تليجرام، انستغرام، وتويتر ومحركات البحث العكسي. أخرج البيانات دائماً بصيغة JSON وفق المخطط المطلوب.',
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -169,7 +174,7 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
             },
             productTitle: {
               type: Type.STRING,
-              description: 'عنوان وصفي للمنتج، مثال: عباية سوداء مطرزة كم فراشة كود 402',
+              description: 'عنوان وصفي للمنتج، مثال: ترنج شتوي ميلتون مبطن كود 704',
             },
             productCategory: {
               type: Type.STRING,
@@ -185,7 +190,7 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
               properties: {
                 phones: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'أرقام الهواتف أو الواتساب المكتوبة' },
                 addresses: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'العناوين أو المدن أو المناطق المذكورة' },
-                socialHandles: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'معرفات تليجرام أو فيسبوك المكتوبة' },
+                socialHandles: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'معرفات تليجرام أو فيسبوك أو انستغرام أو تويتر المكتوبة' },
               },
             },
             specs: {
@@ -202,19 +207,45 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
               items: { type: Type.STRING },
               description: 'السمات البصرية المميزة للمنتج لمطابقة الصور المماثلة',
             },
+            visualFingerprint: {
+              type: Type.OBJECT,
+              properties: {
+                structuralSilhouette: { type: Type.STRING, description: 'التوصيف الهندسي للقصة والأبعاد المقاوم لزاوية التصوير' },
+                colorPaletteInvariant: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'لوحة الألوان الأساسية بعد تصحيح تدرج الإضاءة والظلال' },
+                textureAndFabricPattern: { type: Type.STRING, description: 'وصف دقيق لنسيج الخامة (تريكو، جينز، ميلتون، جلد، إلخ)' },
+                invariantKeypoints: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'العلامات الثابتة غير المتأثرة بالزاوية أو الدوران' },
+                lightingAndAngleToleranceNotes: { type: Type.STRING, description: 'ملاحظة تحليلية حول كيفية مقاومة الإضاءة أو الانعكاسات في الصورة' },
+                robustSearchTokens: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'كلمات بحث بصرية محكمة' },
+              },
+              required: ['structuralSilhouette', 'colorPaletteInvariant', 'textureAndFabricPattern', 'invariantKeypoints'],
+            },
+            similarityMetrics: {
+              type: Type.OBJECT,
+              properties: {
+                overallScore: { type: Type.NUMBER, description: 'النسبة الإجمالية لدقة التعرف البصري (0 إلى 100)' },
+                structuralMatch: { type: Type.NUMBER, description: 'نسبة مطابقة الهيكل والقصة' },
+                textureColorMatch: { type: Type.NUMBER, description: 'نسبة مطابقة النسيج والألوان المقاومة للإضاءة' },
+                logoTypographyMatch: { type: Type.NUMBER, description: 'نسبة مطابقة الشعار والخط' },
+                detailsHardwareMatch: { type: Type.NUMBER, description: 'نسبة مطابقة تفاصيل الخياطة والإكسسوار' },
+              },
+              required: ['overallScore', 'structuralMatch', 'textureColorMatch', 'logoTypographyMatch'],
+            },
             searchQueries: {
               type: Type.OBJECT,
               properties: {
                 facebookPageQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
                 facebookGroupQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
                 telegramQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
+                instagramQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
+                twitterQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
                 reverseImageKeywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                multiAngleReverseQueries: { type: Type.ARRAY, items: { type: Type.STRING } },
               },
-              required: ['facebookPageQueries', 'telegramQueries', 'reverseImageKeywords'],
+              required: ['facebookPageQueries', 'telegramQueries', 'instagramQueries', 'twitterQueries', 'reverseImageKeywords'],
             },
             summaryAr: {
               type: Type.STRING,
-              description: 'ملخص تحليلي مكثف باللغة العربية لما تم العثور عليه في الصورة وتوجيه المستخدم لكيفية العثور على المصنع',
+              description: 'ملخص تحليلي مكثف باللغة العربية لما تم العثور عليه في الصورة وتوجيه المستخدم لكيفية العثور على المصنع عبر كافة المنصات',
             },
           },
           required: [
@@ -222,6 +253,8 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
             'productTitle',
             'productCategory',
             'fullOcrText',
+            'visualFingerprint',
+            'similarityMetrics',
             'searchQueries',
             'summaryAr',
           ],
@@ -247,7 +280,7 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
   }
 });
 
-// Grounded Search endpoint: performs live web & social search across Facebook & Telegram
+// Grounded Search endpoint: performs live web & social search across Facebook, Telegram, Instagram & Twitter (X)
 app.post('/api/search-factory', async (req: Request, res: Response) => {
   try {
     const {
@@ -264,7 +297,7 @@ app.post('/api/search-factory', async (req: Request, res: Response) => {
     }
 
     const searchQueryInstruction = `
-قم بالبحث المباشر والمفصل عبر الإنترنت عن المصنع أو المنتج الآتي:
+قم بالبحث المباشر والمفصل عبر الإنترنت وشبكات التواصل عن المصنع أو المنتج الآتي:
 - اسم المصنع / العلامة التجارية: "${factoryName || 'غير محدد'}"
 - عنوان أو نوع المنتج: "${productTitle || ''}"
 - كود الموديل: "${modelCode || ''}"
@@ -272,12 +305,13 @@ app.post('/api/search-factory', async (req: Request, res: Response) => {
 - المنطقة / الدولة: "${location || 'مصر والوطن العربي'}"
 ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''}
 
-الهدف الرئيسي للبحث:
-1. البحث عن صفحات فيسبوك الخاصة بهذا المصنع (Facebook Pages / Profiles / Stores).
-2. البحث عن مجموعات فيسبوك لجملة المصانع وتجار الجملة والمكاتب التي تعرض منتجات هذا المصنع.
-3. البحث عن قنوات ومجموعات تليجرام (Telegram Channels / Groups t.me/...) المتخصصة في عرض موديلات هذا المصنع، مكاتب التوزيع، قنوات المصنع الرسمية، جروبات الجملة.
-4. استخراج معلومات الاتصال المتاحة (أرقام هواتف، واتساب، عناوين المكاتب والمصانع، أسماء المسؤولين).
-5. تقديم روابط حقيقية ومعلومات دقيقة مع ملخص واضح ومفيد للتاجر والمشتري.
+الهدف الرئيسي للبحث التفاعلي عبر منصات التواصل:
+1. فيسبوك: البحث عن صفحات فيسبوك الخاصة بهذا المصنع (Facebook Pages) وجروبات تجار الجملة ومكاتب التوزيع.
+2. تليجرام: البحث عن قنوات ومجموعات تليجرام (Telegram Channels / Groups t.me/...) المتخصصة في عرض موديلات هذا المصنع ومكاتب التوريد.
+3. انستغرام (Instagram): البحث عن حسابات معارض ومصانع انستغرام (site:instagram.com) وهاشتاجات الموديل والصور والمقاطع المعروضة من المصنع.
+4. تويتر / إكس (Twitter / X): البحث عن حسابات وتغريدات الموردين والمصانع (site:x.com OR site:twitter.com) وإعلانات كود القطعة وعروض التوريد.
+5. استخراج معلومات الاتصال المتاحة (أرقام هواتف، واتساب، عناوين المكاتب والمصانع، أسماء المسؤولين، حسابات التواصل).
+6. تقديم روابط حقيقية ومعلومات دقيقة مع ملخص واضح ومفيد للتاجر والمشتري.
 
 يرجى إخراج النتائج بهيئة JSON منظمة ومطابقة للمخطط.
 `;
@@ -286,7 +320,7 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
       contents: searchQueryInstruction,
       config: {
         tools: [{ googleSearch: {} }],
-        systemInstruction: 'أنت باحث خبير في سوق الجملة والمصانع وتجارة الملابس والمنتجات على فيسبوك وتليجرام. استخدم أداة البحث في جوجل للوصول إلى صفحات فيسبوك الحقيقية وقنوات تليجرام وروابط التواصل، وأعد الإجابة بأسلوب منظم جداً بصيغة JSON قابلة للقراءة.',
+        systemInstruction: 'أنت باحث خبير في سوق الجملة والمصانع وشبكات التواصل فيسبوك وتليجرام وانستغرام وتويتر/إكس. استخدم أداة البحث في جوجل للوصول إلى الحسابات والصفحات والقنوات الحقيقية وروابط التواصل، وأعد الإجابة بأسلوب منظم جداً بصيغة JSON قابلة للقراءة.',
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -320,6 +354,36 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
                   username: { type: Type.STRING, description: 'معرف القناة @username إن وجد' },
                   snippet: { type: Type.STRING, description: 'وصف المحتوى وموديلات المصنع المعروضة' },
                   category: { type: Type.STRING, description: 'قناة مصنع / مكتب جملة / وسيط' },
+                },
+                required: ['title', 'url', 'snippet'],
+              },
+            },
+            instagramFindings: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING, description: 'اسم الحساب أو المنشور' },
+                  url: { type: Type.STRING, description: 'رابط حساب انستغرام أو الهاشتاج' },
+                  username: { type: Type.STRING, description: 'يوزرنيم الحساب @username' },
+                  snippet: { type: Type.STRING, description: 'وصف الحساب أو الموديل المعروض والبيو' },
+                  followersHint: { type: Type.STRING, description: 'ملاحظة حول النشاط أو المتابعين' },
+                  accountType: { type: Type.STRING, description: 'حساب مصنع رسمي / معرض منتجات / متجر جملة' },
+                },
+                required: ['title', 'url', 'snippet'],
+              },
+            },
+            twitterFindings: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING, description: 'عنوان التغريدة أو الحساب' },
+                  url: { type: Type.STRING, description: 'رابط التغريدة أو البروفايل على X/Twitter' },
+                  handle: { type: Type.STRING, description: 'معرف الحساب @handle' },
+                  snippet: { type: Type.STRING, description: 'نص التغريدة أو الإعلان وموديل المصنع' },
+                  postDate: { type: Type.STRING, description: 'تاريخ أو حداثة المنشور' },
+                  relevance: { type: Type.STRING, description: 'إعلان توريد / حساب مصنع / صفقات' },
                 },
                 required: ['title', 'url', 'snippet'],
               },
@@ -365,7 +429,9 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
       factoryOverview: `معلومات وبحث مباشر عن منتجات ومصنع ${factoryName || ''}`,
       facebookFindings: [],
       telegramFindings: [],
-      actionTips: ['استخدم روابط البحث المباشرة بأعلى الصفحة لفحص فيسبوك وتليجرام مباشرة'],
+      instagramFindings: [],
+      twitterFindings: [],
+      actionTips: ['استخدم روابط البحث المباشرة بأعلى الصفحة لفحص فيسبوك وتليجرام وانستغرام وتويتر مباشرة'],
     });
 
     // Extract grounding citations if available
@@ -384,14 +450,16 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
     });
   } catch (error: any) {
     console.error('Error searching factory:', error);
-    // Return graceful partial data so user can still see direct deep links to Facebook & Telegram
+    // Return graceful partial data so user can still see direct deep links to Facebook, Telegram, IG & X
     return res.json({
       success: true,
       data: {
         factoryOverview: `بحث مباشر ومطابقة لمصنع ${req.body?.factoryName || ''}`,
         facebookFindings: [],
         telegramFindings: [],
-        actionTips: ['يمكنك فتح محركات البحث المباشرة في فيسبوك وتليجرام بنقرة واحدة عبر الأزرار المتاحة'],
+        instagramFindings: [],
+        twitterFindings: [],
+        actionTips: ['يمكنك فتح محركات البحث المباشرة في فيسبوك وتليجرام وانستغرام وتويتر بنقرة واحدة عبر الأزرار المتاحة'],
       },
       groundingSources: [],
     });

@@ -4,6 +4,7 @@ import {
   Tag,
   Facebook,
   Send,
+  Instagram,
   Image as ImageIcon,
   Globe,
   FileText,
@@ -13,13 +14,18 @@ import {
   Sparkles,
   ArrowRight,
   ExternalLink,
+  Activity,
+  Sliders,
 } from 'lucide-react';
 import { ImageAnalysisResult, GroundedSearchResult, GroundingSource } from '../types';
 import { ExtractedDataCard } from './ExtractedDataCard';
 import { FacebookSearchSection } from './FacebookSearchSection';
 import { TelegramSearchSection } from './TelegramSearchSection';
+import { InstagramSearchSection } from './InstagramSearchSection';
+import { TwitterSearchSection } from './TwitterSearchSection';
 import { ReverseSearchEngines } from './ReverseSearchEngines';
 import { GroundedWebFindings } from './GroundedWebFindings';
+import { VisualMatchingEngine } from './VisualMatchingEngine';
 
 interface AnalysisOverviewProps {
   analysis: ImageAnalysisResult;
@@ -32,7 +38,15 @@ interface AnalysisOverviewProps {
   onNewScan: () => void;
 }
 
-type TabType = 'extracted' | 'facebook' | 'telegram' | 'reverse' | 'web';
+type TabType =
+  | 'extracted'
+  | 'visual_engine'
+  | 'facebook'
+  | 'telegram'
+  | 'instagram'
+  | 'twitter'
+  | 'reverse'
+  | 'web';
 
 export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
   analysis,
@@ -48,6 +62,8 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
 
   const fbCount = searchResult?.facebookFindings?.length || 0;
   const tgCount = searchResult?.telegramFindings?.length || 0;
+  const igCount = searchResult?.instagramFindings?.length || 0;
+  const twCount = searchResult?.twitterFindings?.length || 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -71,6 +87,11 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
                 {analysis.confidence}
               </span>
+              {analysis.similarityMetrics?.overallScore && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono font-bold">
+                  دقة: {analysis.similarityMetrics.overallScore}%
+                </span>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-0.5">
@@ -120,9 +141,10 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
 
       {/* Tabs Navigation */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-slate-800/80 scrollbar-none">
+        {/* Extracted OCR */}
         <button
           onClick={() => setActiveTab('extracted')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'extracted'
               ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
               : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
@@ -132,16 +154,30 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
           <span>استخراج البيانات والشعار (OCR)</span>
         </button>
 
+        {/* Visual Invariant Matching Engine */}
+        <button
+          onClick={() => setActiveTab('visual_engine')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+            activeTab === 'visual_engine'
+              ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/25 ring-1 ring-cyan-400/30'
+              : 'bg-slate-900/60 text-cyan-400 hover:text-cyan-200 hover:bg-slate-800'
+          }`}
+        >
+          <Activity className="w-4 h-4 text-cyan-300" />
+          <span>دقة التطابق البصري المقاوم للزوايا</span>
+        </button>
+
+        {/* Facebook */}
         <button
           onClick={() => setActiveTab('facebook')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'facebook'
               ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
               : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
           }`}
         >
-          <Facebook className="w-4 h-4 text-blue-400 group-hover:text-white" />
-          <span>صفحات وجروبات فيسبوك</span>
+          <Facebook className="w-4 h-4 text-blue-400" />
+          <span>فيسبوك</span>
           {fbCount > 0 && (
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono">
               {fbCount}
@@ -149,16 +185,17 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
           )}
         </button>
 
+        {/* Telegram */}
         <button
           onClick={() => setActiveTab('telegram')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'telegram'
               ? 'bg-sky-600 text-white shadow-lg shadow-sky-600/25'
               : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
           }`}
         >
           <Send className="w-4 h-4 text-sky-400" />
-          <span>قنوات تليجرام والموردين</span>
+          <span>تليجرام</span>
           {tgCount > 0 && (
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono">
               {tgCount}
@@ -166,28 +203,66 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
           )}
         </button>
 
+        {/* Instagram */}
+        <button
+          onClick={() => setActiveTab('instagram')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+            activeTab === 'instagram'
+              ? 'bg-gradient-to-r from-rose-600 to-purple-600 text-white shadow-lg shadow-rose-600/25'
+              : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+          }`}
+        >
+          <Instagram className="w-4 h-4 text-rose-400" />
+          <span>انستغرام</span>
+          {igCount > 0 && (
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono">
+              {igCount}
+            </span>
+          )}
+        </button>
+
+        {/* Twitter / X */}
+        <button
+          onClick={() => setActiveTab('twitter')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+            activeTab === 'twitter'
+              ? 'bg-slate-800 text-white shadow-lg shadow-slate-800/40 border border-slate-700'
+              : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+          }`}
+        >
+          <span className="font-mono font-bold text-xs">𝕏</span>
+          <span>تويتر / إكس</span>
+          {twCount > 0 && (
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20 text-white font-mono">
+              {twCount}
+            </span>
+          )}
+        </button>
+
+        {/* Reverse Image Engines */}
         <button
           onClick={() => setActiveTab('reverse')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'reverse'
               ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/25'
               : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
           }`}
         >
           <ImageIcon className="w-4 h-4 text-purple-400" />
-          <span>البحث عن الصور المماثلة</span>
+          <span>البحث العكسي للصور</span>
         </button>
 
+        {/* Web Profile */}
         <button
           onClick={() => setActiveTab('web')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
             activeTab === 'web'
               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25'
               : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
           }`}
         >
           <Globe className="w-4 h-4 text-emerald-400" />
-          <span>نتائج الويب وملف المصنع</span>
+          <span>ملف المصنع والويب</span>
         </button>
       </div>
 
@@ -197,6 +272,17 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
           <ExtractedDataCard
             analysis={analysis}
             onEditFactoryName={onOpenRefineModal}
+          />
+        )}
+
+        {activeTab === 'visual_engine' && (
+          <VisualMatchingEngine
+            fingerprint={analysis.visualFingerprint}
+            metrics={analysis.similarityMetrics}
+            productTitle={analysis.productTitle}
+            factoryName={analysis.factoryName}
+            imageUrl={imageUrl}
+            multiAngleQueries={analysis.searchQueries?.multiAngleReverseQueries}
           />
         )}
 
@@ -222,9 +308,34 @@ export const AnalysisOverview: React.FC<AnalysisOverviewProps> = ({
           />
         )}
 
+        {activeTab === 'instagram' && (
+          <InstagramSearchSection
+            factoryName={analysis.factoryName}
+            modelCode={analysis.modelCodes?.[0]}
+            category={analysis.productCategory}
+            findings={searchResult?.instagramFindings || []}
+            isSearching={isSearchingFactory}
+            onRefineSearch={onOpenRefineModal}
+          />
+        )}
+
+        {activeTab === 'twitter' && (
+          <TwitterSearchSection
+            factoryName={analysis.factoryName}
+            modelCode={analysis.modelCodes?.[0]}
+            category={analysis.productCategory}
+            findings={searchResult?.twitterFindings || []}
+            isSearching={isSearchingFactory}
+            onRefineSearch={onOpenRefineModal}
+          />
+        )}
+
         {activeTab === 'reverse' && (
           <ReverseSearchEngines
-            keywords={analysis.searchQueries?.reverseImageKeywords || []}
+            keywords={[
+              ...(analysis.searchQueries?.reverseImageKeywords || []),
+              ...(analysis.searchQueries?.multiAngleReverseQueries || []),
+            ]}
             factoryName={analysis.factoryName}
             productTitle={analysis.productTitle}
             modelCode={analysis.modelCodes?.[0]}

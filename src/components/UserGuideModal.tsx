@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, HelpCircle, CheckCircle2, Facebook, Send, Image, Search, ShieldCheck } from 'lucide-react';
+import { X, HelpCircle, CheckCircle2, Facebook, Send, Instagram, Sparkles, Image, Search, ShieldCheck } from 'lucide-react';
 
 interface UserGuideModalProps {
   isOpen: boolean;
@@ -76,11 +76,35 @@ export const UserGuideModal: React.FC<UserGuideModalProps> = ({ isOpen, onClose 
             </div>
 
             <div className="flex items-start gap-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+              <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400 shrink-0">
+                <Instagram className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-white text-sm">4. انستغرام وتويتر (𝕏)</h4>
+                <p className="text-slate-400">
+                  كشف معارض ملابس المصنع وريلز انستغرام وهاشتاج الموديل لرؤية حركة القطعة وخامتها تحت الإضاءة الطبيعية، بالإضافة لمتابعة تغريدات وصفقات التوريد المباشرة على منصة 𝕏.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+              <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-white text-sm">5. خوارزمية التطابق البصري المقاوم للزوايا والإضاءة</h4>
+                <p className="text-slate-400">
+                  تتعرف الخوارزمية على الموديل حتى لو كانت الصورة ملتقطة من زاوية مائلة، أو تحت إضاءة ضعيفة أو فلاش حاد، أو مع انعكاسات أكياس التعبئة البلاستيكية، من خلال عزل الهيكل الهندسي ونمط النسيج وتوليد استعلامات مطابقة محكمة.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
               <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
                 <Image className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-bold text-white text-sm">4. البحث العكسي ومطابقة الصور المتشابهة</h4>
+                <h4 className="font-bold text-white text-sm">6. البحث العكسي ومطابقة الصور المتشابهة</h4>
                 <p className="text-slate-400">
                   استخدم محرك Yandex أو Google Lens بنقرة واحدة لاكتشاف الصور المتطابقة لنفس التصميم في متاجر أخرى ومواقع التوريد العالمية (Alibaba, Taobao, إلخ) أو الموديلات المشابهة في القصات والألوان.
                 </p>
