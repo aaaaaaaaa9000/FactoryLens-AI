@@ -202,7 +202,7 @@ ${error ? `<p class="err" role="alert">${escapeHtml(error)}</p>` : ''}
     }
     res.set('Cache-Control', 'no-store');
     if (req.path.startsWith('/api/')) {
-      return res.status(401).json({ error: 'unauthorized', message: 'انتهت الجلسة. سجّل الدخول من جديد.', login: '/login' });
+      return res.status(401).json({ error: 'انتهت الجلسة. حدّث الصفحة وسجّل الدخول من جديد.', code: 'unauthorized', login: '/login' });
     }
     if (req.method === 'GET' || req.method === 'HEAD') {
       return res.redirect(302, `/login?next=${encodeURIComponent(req.originalUrl)}`);
