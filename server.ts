@@ -28,7 +28,8 @@ const ai = new GoogleGenAI({
 
 // Helper function to execute Gemini calls with automatic retry and model fallback for 503/capacity spikes
 async function generateWithRetryAndFallback(params: any): Promise<any> {
-  const fallbackModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-flash-lite'];
+  const fallbackModels = (process.env.GEMINI_MODELS || 'gemini-2.5-flash,gemini-flash-latest,gemini-2.5-flash-lite')
+    .split(',').map((m) => m.trim()).filter(Boolean);
   let lastError: any = null;
 
   for (const modelName of fallbackModels) {
@@ -219,17 +220,6 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
               },
               required: ['structuralSilhouette', 'colorPaletteInvariant', 'textureAndFabricPattern', 'invariantKeypoints'],
             },
-            similarityMetrics: {
-              type: Type.OBJECT,
-              properties: {
-                overallScore: { type: Type.NUMBER, description: 'النسبة الإجمالية لدقة التعرف البصري (0 إلى 100)' },
-                structuralMatch: { type: Type.NUMBER, description: 'نسبة مطابقة الهيكل والقصة' },
-                textureColorMatch: { type: Type.NUMBER, description: 'نسبة مطابقة النسيج والألوان المقاومة للإضاءة' },
-                logoTypographyMatch: { type: Type.NUMBER, description: 'نسبة مطابقة الشعار والخط' },
-                detailsHardwareMatch: { type: Type.NUMBER, description: 'نسبة مطابقة تفاصيل الخياطة والإكسسوار' },
-              },
-              required: ['overallScore', 'structuralMatch', 'textureColorMatch', 'logoTypographyMatch'],
-            },
             searchQueries: {
               type: Type.OBJECT,
               properties: {
@@ -254,7 +244,6 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
             'productCategory',
             'fullOcrText',
             'visualFingerprint',
-            'similarityMetrics',
             'searchQueries',
             'summaryAr',
           ],
@@ -316,11 +305,21 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
 يرجى إخراج النتائج بهيئة JSON منظمة ومطابقة للمخطط.
 `;
 
-    const response = await generateWithRetryAndFallback({
-      contents: searchQueryInstruction,
+    // Step 1: live Google Search grounding (tools cannot be combined with JSON schema mode reliably)
+    const searchResponse = await generateWithRetryAndFallback({
+      contents: searchQueryInstruction.replace('يرجى إخراج النتائج بهيئة JSON منظمة ومطابقة للمخطط.', 'اكتب النتائج كنص منظم مع الروابط الكاملة كما ظهرت في نتائج البحث. لا تخترع أي رابط أو رقم؛ إن لم تجد شيئاً اكتب أنك لم تجد.'),
       config: {
         tools: [{ googleSearch: {} }],
-        systemInstruction: 'أنت باحث خبير في سوق الجملة والمصانع وشبكات التواصل فيسبوك وتليجرام وانستغرام وتويتر/إكس. استخدم أداة البحث في جوجل للوصول إلى الحسابات والصفحات والقنوات الحقيقية وروابط التواصل، وأعد الإجابة بأسلوب منظم جداً بصيغة JSON قابلة للقراءة.',
+        systemInstruction: 'أنت باحث خبير في سوق الجملة والمصانع وشبكات التواصل. استخدم بحث جوجل للوصول إلى الحسابات والصفحات والقنوات الحقيقية. اذكر فقط ما وجدته فعلاً في نتائج البحث ولا تخمّن روابط.',
+      },
+    });
+    const searchText: string = searchResponse.text || '';
+
+    // Step 2: structure the findings into JSON (no tools)
+    const response = await generateWithRetryAndFallback({
+      contents: `حوّل نتائج البحث التالية إلى JSON وفق المخطط. استخدم فقط الروابط والأرقام المذكورة نصاً في النتائج، واترك القوائم فارغة لو لم يوجد شيء. لا تضف أي رابط من عندك.\n\n${searchText}`,
+      config: {
+        systemInstruction: 'أنت منظّم بيانات دقيق. لا تخترع روابط أو أرقاماً.',
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -434,8 +433,31 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
       actionTips: ['استخدم روابط البحث المباشرة بأعلى الصفحة لفحص فيسبوك وتليجرام وانستغرام وتويتر مباشرة'],
     });
 
+    // Keep only links that point to the expected platform AND appear in the real search text
+    const hostOk = (u: string, hosts: string[]) => {
+      try {
+        const h = new URL(u).hostname.replace(/^www\./, '');
+        return hosts.some((x) => h === x || h.endsWith('.' + x));
+      } catch {
+        return false;
+      }
+    };
+    const normalize = (u: string) => u.replace(/[\/?#]+$/, '');
+    const inText = (u: string) => searchText.includes(normalize(u));
+    const clean = (list: any, hosts: string[]) =>
+      (Array.isArray(list) ? list : [])
+        .filter((f: any) => f?.url && hostOk(f.url, hosts) && inText(f.url))
+        .map((f: any) => ({ ...f, verified: true }));
+    parsedResults.facebookFindings = clean(parsedResults.facebookFindings, ['facebook.com', 'fb.com', 'fb.me']);
+    parsedResults.telegramFindings = clean(parsedResults.telegramFindings, ['t.me', 'telegram.me', 'telegram.org']);
+    parsedResults.instagramFindings = clean(parsedResults.instagramFindings, ['instagram.com']);
+    parsedResults.twitterFindings = clean(parsedResults.twitterFindings, ['x.com', 'twitter.com']);
+    parsedResults.otherWholesaleSources = (Array.isArray(parsedResults.otherWholesaleSources) ? parsedResults.otherWholesaleSources : []).filter(
+      (f: any) => f?.url && /^https?:\/\//.test(f.url) && inText(f.url)
+    );
+
     // Extract grounding citations if available
-    const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const groundingChunks = searchResponse.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
     const webSources = groundingChunks
       .filter((chunk: any) => chunk.web?.uri)
       .map((chunk: any) => ({
@@ -450,18 +472,9 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
     });
   } catch (error: any) {
     console.error('Error searching factory:', error);
-    // Return graceful partial data so user can still see direct deep links to Facebook, Telegram, IG & X
-    return res.json({
-      success: true,
-      data: {
-        factoryOverview: `بحث مباشر ومطابقة لمصنع ${req.body?.factoryName || ''}`,
-        facebookFindings: [],
-        telegramFindings: [],
-        instagramFindings: [],
-        twitterFindings: [],
-        actionTips: ['يمكنك فتح محركات البحث المباشرة في فيسبوك وتليجرام وانستغرام وتويتر بنقرة واحدة عبر الأزرار المتاحة'],
-      },
-      groundingSources: [],
+    return res.status(502).json({
+      success: false,
+      error: 'فشل البحث المباشر على الإنترنت (' + (error?.message || 'خطأ غير معروف').slice(0, 120) + '). يمكنك استخدام روابط البحث اليدوي أو إعادة المحاولة.',
     });
   }
 });
