@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { GoogleGenAI, Type } from '@google/genai';
 import path from 'path';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
+import { installLogin } from './login';
 
 dotenv.config();
 
@@ -20,16 +20,12 @@ app.get('/api/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', hasGeminiKey: Boolean(process.env.GEMINI_API_KEY) });
 });
 
-// Optional Basic Auth, enabled only when APP_PASSWORD is set
-app.use((req: Request, res: Response, next) => {
-  const password = process.env.APP_PASSWORD;
-  if (!password) return next();
-  const expected = Buffer.from(`${process.env.APP_USERNAME || 'user'}:${password}`);
-  const header = req.headers.authorization || '';
-  const given = Buffer.from(Buffer.from(header.replace(/^Basic /, ''), 'base64').toString());
-  if (given.length === expected.length && crypto.timingSafeEqual(given, expected)) return next();
-  res.set('WWW-Authenticate', 'Basic realm="FactoryLens"');
-  return res.status(401).send('Authentication required');
+// In-page login form + session cookie, enabled only when APP_PASSWORD is set
+installLogin(app, {
+  appName: 'بصير المصانع',
+  username: process.env.APP_USERNAME || 'user',
+  password: process.env.APP_PASSWORD || '',
+  accent: '#4f46e5',
 });
 
 // Per-IP rate limit on the AI endpoints

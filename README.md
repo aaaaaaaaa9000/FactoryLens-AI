@@ -10,7 +10,9 @@
 | GEMINI_MODEL | الموديل الأساسي | gemini-3.8-flash |
 | RATE_LIMIT_PER_MINUTE | حد الطلبات لكل عنوان في الدقيقة | 10 |
 | MAX_INPUT_CHARS | أقصى طول لحقول النص | 1000 |
-| APP_USERNAME / APP_PASSWORD | حماية بكلمة سر (تشتغل لو الباسورد موجود) | - |
+| APP_USERNAME / APP_PASSWORD | صفحة دخول بكلمة سر (تشتغل لو الباسورد موجود)، ومدير كلمات السر يقدر يملاها | - |
+| SESSION_DAYS | مدة بقاء الدخول على الجهاز بالأيام | 180 |
+| SESSION_SECRET | مفتاح توقيع الجلسة (اختياري، الافتراضي مشتق من الباسورد) | - |
 | APP_DOMAIN | الدومين في تراييفك | factorylens.aaaaaaaaa9000.cloud |
 
 ## التشغيل المحلي

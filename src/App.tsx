@@ -109,6 +109,11 @@ export default function App() {
         body: JSON.stringify({ imageBase64, mimeType, userPrompt }),
       });
 
+      if (response.status === 401) {
+        // Session expired: back to the login page, then return here.
+        window.location.assign('/login');
+        return;
+      }
       const resData = await response.json();
 
       if (!response.ok || !resData.success) {
@@ -158,6 +163,11 @@ export default function App() {
         body: JSON.stringify(params),
       });
 
+      if (response.status === 401) {
+        // Session expired: back to the login page, then return here.
+        window.location.assign('/login');
+        return;
+      }
       const resData = await response.json();
 
       if (response.ok && resData.success) {
