@@ -1,34 +1,66 @@
 import express, { Request, Response } from 'express';
-import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.set('trust proxy', 1);
+app.use(express.json({ limit: '15mb' }));
+
+const MAX_INPUT_CHARS = parseInt(process.env.MAX_INPUT_CHARS || '1000', 10);
+const RATE_LIMIT_PER_MINUTE = parseInt(process.env.RATE_LIMIT_PER_MINUTE || '10', 10);
+
+// Health check (before auth and rate limit)
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({ status: 'ok', hasGeminiKey: Boolean(process.env.GEMINI_API_KEY) });
+});
+
+// Optional Basic Auth, enabled only when APP_PASSWORD is set
+app.use((req: Request, res: Response, next) => {
+  const password = process.env.APP_PASSWORD;
+  if (!password) return next();
+  const expected = Buffer.from(`${process.env.APP_USERNAME || 'user'}:${password}`);
+  const header = req.headers.authorization || '';
+  const given = Buffer.from(Buffer.from(header.replace(/^Basic /, ''), 'base64').toString());
+  if (given.length === expected.length && crypto.timingSafeEqual(given, expected)) return next();
+  res.set('WWW-Authenticate', 'Basic realm="FactoryLens"');
+  return res.status(401).send('Authentication required');
+});
+
+// Per-IP rate limit on the AI endpoints
+const hits = new Map<string, number[]>();
+app.use('/api', (req: Request, res: Response, next) => {
+  if (req.path === '/health') return next();
+  const now = Date.now();
+  const ip = req.ip || 'unknown';
+  const recent = (hits.get(ip) || []).filter((t) => now - t < 60_000);
+  if (recent.length >= RATE_LIMIT_PER_MINUTE) {
+    return res.status(429).json({ error: 'طلبات كثيرة في وقت قصير، انتظر دقيقة وحاول مرة أخرى.' });
+  }
+  recent.push(now);
+  hits.set(ip, recent);
+  next();
+});
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, ts] of hits) if (ts.every((t) => now - t >= 60_000)) hits.delete(ip);
+}, 5 * 60_000).unref();
+
+const tooLong = (...vals: unknown[]) => vals.some((v) => typeof v === 'string' && v.length > MAX_INPUT_CHARS);
 
 // Shared Gemini Client
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    },
-  },
 });
 
 // Helper function to execute Gemini calls with automatic retry and model fallback for 503/capacity spikes
 async function generateWithRetryAndFallback(params: any): Promise<any> {
-  const fallbackModels = (process.env.GEMINI_MODELS || 'gemini-2.5-flash,gemini-flash-latest,gemini-2.5-flash-lite')
+  const fallbackModels = (process.env.GEMINI_MODEL || process.env.GEMINI_MODELS || 'gemini-3.8-flash,gemini-flash-latest,gemini-2.5-flash')
     .split(',').map((m) => m.trim()).filter(Boolean);
   let lastError: any = null;
 
@@ -84,15 +116,6 @@ function parseJsonSafely(rawText: string, fallbackObj: any = {}): any {
   }
 }
 
-// Health check endpoint
-app.get('/api/health', (req: Request, res: Response) => {
-  res.json({
-    status: 'ok',
-    hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
-    timestamp: new Date().toISOString(),
-  });
-});
-
 // Analyze Image endpoint (OCR + Factory / Brand detection + Visual Specs Extraction)
 app.post('/api/analyze-image', async (req: Request, res: Response) => {
   try {
@@ -100,6 +123,10 @@ app.post('/api/analyze-image', async (req: Request, res: Response) => {
 
     if (!imageBase64) {
       return res.status(400).json({ error: 'صورة المنتج مطلوبة للتحليل (imageBase64 missing)' });
+    }
+
+    if (tooLong(userPrompt)) {
+      return res.status(400).json({ error: 'الملاحظة طويلة جداً.' });
     }
 
     // Clean base64 header if present
@@ -263,7 +290,7 @@ ${userPrompt ? `ملاحظة إضافية من المستخدم: ${userPrompt}` 
     return res.status(isOverloaded ? 503 : 500).json({
       error: isOverloaded
         ? 'سيرفرات الذكاء الاصطناعي تشهد ضغطاً مؤقتاً في هذه اللحظة. يرجى النقر على زر "إعادة المحاولة" بعد لحظات.'
-        : error?.message || 'حدث خطأ أثناء فحص وتحليل الصورة.',
+        : 'حدث خطأ أثناء فحص وتحليل الصورة.',
       isOverloaded,
     });
   }
@@ -283,6 +310,10 @@ app.post('/api/search-factory', async (req: Request, res: Response) => {
 
     if (!factoryName && !productTitle && !modelCode) {
       return res.status(400).json({ error: 'يرجى تقديم اسم المصنع أو كود الموديل أو عنوان المنتج للبحث' });
+    }
+
+    if (tooLong(factoryName, productTitle, modelCode, category, location, additionalKeywords)) {
+      return res.status(400).json({ error: 'أحد الحقول طويل جداً.' });
     }
 
     const searchQueryInstruction = `
@@ -474,7 +505,7 @@ ${additionalKeywords ? `- كلمات إضافية: "${additionalKeywords}"` : ''
     console.error('Error searching factory:', error);
     return res.status(502).json({
       success: false,
-      error: 'فشل البحث المباشر على الإنترنت (' + (error?.message || 'خطأ غير معروف').slice(0, 120) + '). يمكنك استخدام روابط البحث اليدوي أو إعادة المحاولة.',
+      error: 'فشل البحث المباشر على الإنترنت. يمكنك استخدام روابط البحث اليدوي أو إعادة المحاولة.',
     });
   }
 });
@@ -484,15 +515,18 @@ async function startServer() {
   const isProduction = process.env.NODE_ENV === 'production';
 
   if (!isProduction) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve(__dirname, 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req: Request, res: Response) => {
+    const distPath = path.resolve(process.cwd(), 'dist');
+    app.use('/assets', express.static(path.join(distPath, 'assets'), { maxAge: '1y', immutable: true }));
+    app.use(express.static(distPath, { index: false }));
+    app.get('*', (_req: Request, res: Response) => {
+      res.set('Cache-Control', 'no-cache');
       res.sendFile(path.resolve(distPath, 'index.html'));
     });
   }
