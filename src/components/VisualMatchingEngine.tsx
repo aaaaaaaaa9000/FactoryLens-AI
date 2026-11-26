@@ -39,11 +39,12 @@ export const VisualMatchingEngine: React.FC<VisualMatchingEngineProps> = ({
   const [focusArea, setFocusArea] = useState<'full' | 'tag' | 'logo'>('full');
 
   // Fallback metrics if not returned
-  const score = metrics?.overallScore ?? 94;
-  const structuralScore = metrics?.structuralMatch ?? 96;
-  const textureScore = metrics?.textureColorMatch ?? 92;
-  const logoScore = metrics?.logoTypographyMatch ?? 97;
-  const detailsScore = metrics?.detailsHardwareMatch ?? 90;
+  const hasMetrics = typeof metrics?.overallScore === 'number';
+  const score = metrics?.overallScore ?? 0;
+  const structuralScore = metrics?.structuralMatch ?? 0;
+  const textureScore = metrics?.textureColorMatch ?? 0;
+  const logoScore = metrics?.logoTypographyMatch ?? 0;
+  const detailsScore = metrics?.detailsHardwareMatch ?? 0;
 
   const keypoints = fingerprint?.invariantKeypoints || [
     'المحيط الخارجي للقطعة والقصة المستقيمة',
@@ -80,7 +81,7 @@ export const VisualMatchingEngine: React.FC<VisualMatchingEngineProps> = ({
           <div className="space-y-2 flex-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold">
               <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span>خوارزمية المطابقة البصرية المقاومة لاختلاف الزوايا والإضاءة (Invariant V-Engine)</span>
+              <span>خوارزمية المطابقة البصرية المقاومة لاختلاف الزوايا والإضاءة </span>
             </div>
 
             <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
@@ -88,11 +89,11 @@ export const VisualMatchingEngine: React.FC<VisualMatchingEngineProps> = ({
             </h3>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
-              تقوم الخوارزمية بتحليل المعالم الهندسية الثابتة للقطعة (Silhouette Invariance)، ونمط النسيج الدقيق، وتصحيح انحرافات زوايا الكاميرا (Perspective De-skew) وانعكاسات أكياس التغليف لضمان دقة استثنائية في التعرف والمطابقة.
+              تقوم الخوارزمية بتحليل المعالم الهندسية الثابتة للقطعة (Silhouette Invariance)، ونمط النسيج الدقيق، وتصحيح انحرافات زوايا الكاميرا (Perspective De-skew) وانعكاسات أكياس التغليف لتوليد كلمات بحث أدق. النتائج وصف تقديري بالذكاء الاصطناعي وليست مطابقة صور فعلية؛ للمطابقة الحقيقية استخدم البحث بالصورة في عدسة جوجل وياندكس.
             </p>
           </div>
 
-          {/* Overall Similarity Confidence Gauge */}
+          {hasMetrics && (
           <div className="bg-slate-950/80 border border-indigo-500/30 p-4 rounded-2xl flex items-center gap-4 shrink-0 shadow-inner">
             <div className="relative w-18 h-18 rounded-full border-4 border-slate-850 flex items-center justify-center">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -124,10 +125,11 @@ export const VisualMatchingEngine: React.FC<VisualMatchingEngineProps> = ({
               <span className="text-[10px] text-slate-500 block">مقاوم لظلال الإضاءة والميل</span>
             </div>
           </div>
+          )}
         </div>
 
         {/* 4 Invariant Dimension Gauges */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6 mt-6 border-t border-slate-800/80">
+        {hasMetrics && (<div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6 mt-6 border-t border-slate-800/80">
           <div className="bg-slate-950/60 border border-slate-800 p-3 rounded-xl space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-400">الهيكل والقصّة:</span>
@@ -172,6 +174,7 @@ export const VisualMatchingEngine: React.FC<VisualMatchingEngineProps> = ({
             <span className="text-[10px] text-slate-500">عزل الخلفية المشوشة</span>
           </div>
         </div>
+        )}
       </div>
 
       {/* Interactive Visual Invariant Simulator */}

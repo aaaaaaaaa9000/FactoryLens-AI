@@ -27,7 +27,7 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
       iconName: 'Sparkles',
       badge: 'الأكثر دقة',
       badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      url: `https://www.google.com/search?q=${query}&tbm=isch`,
+      url: `https://lens.google.com/`,
       isImageUpload: true,
     },
     {
@@ -38,7 +38,7 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
       iconName: 'Image',
       badge: 'الأفضل للملابس والأقمشة',
       badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      url: `https://yandex.com/images/search?text=${query}`,
+      url: `https://yandex.com/images/`,
       isImageUpload: true,
     },
     {
@@ -49,7 +49,7 @@ export function generateReverseSearchLinks(queryKeywords: string[], imageUrl?: s
       iconName: 'Search',
       badge: 'متاجر ومصانع',
       badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      url: `https://www.bing.com/images/search?q=${query}`,
+      url: `https://www.bing.com/visualsearch`,
       isImageUpload: true,
     },
     {

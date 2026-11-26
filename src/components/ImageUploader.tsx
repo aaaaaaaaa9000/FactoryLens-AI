@@ -20,6 +20,27 @@ interface ImageUploaderProps {
   loadingStep: string;
 }
 
+// Shrink big photos before upload: faster, cheaper and avoids server body limits
+function downscaleImage(dataUrl: string, maxSide = 1600): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(dataUrl);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
   onAnalyze,
   onSelectSample,
@@ -99,8 +120,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const handleStartAnalysis = async () => {
     if (!previewUrl) return;
-    const mimeType = selectedFile?.type || 'image/jpeg';
-    await onAnalyze(previewUrl, mimeType, userPrompt);
+    const small = await downscaleImage(previewUrl);
+    await onAnalyze(small, 'image/jpeg', userPrompt);
   };
 
   const handleClear = () => {

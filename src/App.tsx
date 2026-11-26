@@ -40,6 +40,7 @@ export default function App() {
   const [loadingStep, setLoadingStep] = useState<string>('');
   const [isSearchingFactory, setIsSearchingFactory] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
@@ -149,6 +150,7 @@ export default function App() {
     imgToSave?: string
   ) => {
     setIsSearchingFactory(true);
+    setSearchError(null);
     try {
       const response = await fetch('/api/search-factory', {
         method: 'POST',
@@ -168,10 +170,11 @@ export default function App() {
           saveToHistory(targetImage, targetAnalysis, resData.data);
         }
       } else {
-        console.warn('Search returned error, continuing with extracted data', resData.error);
+        setSearchError(resData.error || 'فشل البحث المباشر، حاول مرة أخرى.');
       }
     } catch (err) {
       console.error('Factory search failed:', err);
+      setSearchError('تعذر الاتصال بخادم البحث المباشر.');
     } finally {
       setIsSearchingFactory(false);
     }
@@ -204,6 +207,7 @@ export default function App() {
     setSearchResult(null);
     setGroundingSources([]);
     setErrorMessage(null);
+    setSearchError(null);
   };
 
   return (
@@ -217,6 +221,12 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+        {searchError && analysis && (
+          <div className="bg-amber-950/40 border border-amber-500/40 text-amber-200 p-3 rounded-2xl text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{searchError}</span>
+          </div>
+        )}
         {/* Error Alert with direct Retry button */}
         {errorMessage && (
           <div className="bg-gradient-to-r from-rose-950/60 to-slate-900 border border-rose-500/40 text-rose-200 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs animate-fade-in shadow-xl">

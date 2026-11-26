@@ -52,6 +52,30 @@ export const ReverseSearchEngines: React.FC<ReverseSearchEnginesProps> = ({
     setTimeout(() => setCopiedKeyword(null), 1800);
   };
 
+  const [copiedImage, setCopiedImage] = useState(false);
+  const handleCopyImage = async () => {
+    if (!uploadedImageUrl) return;
+    try {
+      const blob = await (await fetch(uploadedImageUrl)).blob();
+      const png = blob.type === 'image/png' ? blob : await new Promise<Blob>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = img.width; c.height = img.height;
+          c.getContext('2d')!.drawImage(img, 0, 0);
+          c.toBlob((b) => (b ? resolve(b) : reject()), 'image/png');
+        };
+        img.onerror = reject;
+        img.src = uploadedImageUrl;
+      });
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+      setCopiedImage(true);
+      setTimeout(() => setCopiedImage(false), 2500);
+    } catch {
+      handleDownloadImage();
+    }
+  };
+
   const handleDownloadImage = () => {
     if (!uploadedImageUrl) return;
     const a = document.createElement('a');
@@ -76,18 +100,27 @@ export const ReverseSearchEngines: React.FC<ReverseSearchEnginesProps> = ({
             </h3>
           </div>
           <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            للعثور على صور مطابقة تماماً للموديل أو صور أخرى للمنتج ملتقطة من زوايا مختلفة في مصانع ومتاجر أخرى، يمكنك استخدام الروابط المباشرة أدناه أو تنزيل الصورة ورفعها في Google Lens أو Yandex.
+            للعثور على صور مطابقة تماماً للموديل أو صور أخرى للمنتج ملتقطة من زوايا مختلفة في مصانع ومتاجر أخرى، اضغط «انسخ الصورة» ثم افتح المحرك والصق الصورة (Ctrl+V) أو ارفعها يدوياً.
           </p>
         </div>
 
         {uploadedImageUrl && (
+          <div className="flex gap-2 shrink-0">
+          <button
+            onClick={handleCopyImage}
+            className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+          >
+            <Copy className="w-4 h-4" />
+            <span>{copiedImage ? 'تم النسخ، افتح المحرك والصق بـ Ctrl+V' : 'انسخ الصورة ثم الصقها في المحرك'}</span>
+          </button>
           <button
             onClick={handleDownloadImage}
             className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition"
           >
             <Download className="w-4 h-4 text-cyan-400" />
-            <span>حفظ الصورة لرفعها بالعدسة</span>
+            <span>حفظ الصورة</span>
           </button>
+          </div>
         )}
       </div>
 
